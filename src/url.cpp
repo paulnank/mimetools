@@ -17,11 +17,12 @@
 
 #include <string.h>
 #include <ctype.h>
+#include "PluginInterface.h"
 
 #include "url.h"
 
 // These characters must be encoded in a URL, as per RFC1738
-static const char gReservedAscii[] = "<>\"#%{}|\\^~[]`;/?:@=& ";  
+static const char gReservedAscii[] = "<>\"#%{}|\\^~[]`;/?:@=& ";
 static const char gHexChar[] = "0123456789ABCDEF";
 
 int AsciiToUrl (char* dest, const char* src, int destSize, bool encodeAll)
@@ -53,53 +54,18 @@ int AsciiToUrl (char* dest, const char* src, int destSize, bool encodeAll)
 
 int UrlToAscii (char* dest, const char* src, int destSize)
 {
-  char	val;
-  int i, j;
-
-  memset (dest, 0, destSize);
-
-  for (i = 0; (i < destSize) && *src; ++i)
-  {
-    if (*src == '%')
+    int len;
+    int c1, c2;
+    for (len = 0; len < destSize && (c1 = *src++) != '\0'; )
     {
-      ++src;
-
-      // Found an encoded triplet.
-      // The next two characters must be hex.
-      //
-      if (isxdigit(src[0]) && isxdigit(src[1]))
-      {
-        for (val = 0, j = 0; j < 2; ++j, ++src)
+        if (c1 == '%' && isxdigit(src[0]) && isxdigit(src[1]))
         {
-          val <<= 4;
-
-          if (isdigit(*src))
-          {
-            val += *src - '0';
-          }
-          else if (isupper(*src))
-          {
-            val += *src - 'A' + 10;
-          }
-          else
-          {
-            val += *src - 'a' + 10;
-          }
+            c1 = (UCHAR)*src++;
+            c2 = (UCHAR)*src++;
+            c1 = ((isdigit(c1) ? c1 - '0' : tolower(c1) - 'a' + 10) << 4) +
+                  (isdigit(c2) ? c2 - '0' : tolower(c2) - 'a' + 10);
         }
-
-        *dest++ = val;
-      }
-      else  // invalid encoding
-      {
-        return -1;
-      }
+        dest[len++] = (char) c1;
     }
-    else  // non-encoded character, so just copy it
-    {
-      *dest++ = *src;
-      ++src;
-    }
-  }
-
-  return i;
+    return len;
 }

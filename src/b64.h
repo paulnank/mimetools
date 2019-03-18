@@ -26,6 +26,6 @@
 #include <windows.h>
 
 int base64Encode(char *resultString, const char *asciiString, size_t asciiStringLength, size_t wrapLength, bool padFlag, bool byLineFlag);
-int base64Decode(char *resultString, const char *encodedString, size_t encodedStringLength, bool strictFlag, bool whitespaceReset);
+int base64Decode(char *resultString, const char *encodedString, size_t encodedStringLength, bool strictFlag, bool noWhiteSpace);
 
 #endif //NPP_B64_H
